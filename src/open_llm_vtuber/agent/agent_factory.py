@@ -5,7 +5,7 @@ from .agents.agent_interface import AgentInterface
 from .agents.basic_memory_agent import BasicMemoryAgent
 from .stateless_llm_factory import LLMFactory as StatelessLLMFactory
 from .agents.hume_ai import HumeAIAgent
-
+from .agents.basic_agent import BasicAgent
 
 class AgentFactory:
     @staticmethod
@@ -97,6 +97,16 @@ class AgentFactory:
                 host=settings.get("host", "api.hume.ai"),
                 config_id=settings.get("config_id"),
                 idle_timeout=settings.get("idle_timeout", 15),
+            )
+
+        elif conversation_agent_choice == "basic_agent":
+            settings = agent_settings.get("basic_agent", {})
+            return BasicAgent(
+                live2d_model=live2d_model,
+                tts_preprocessor_config=tts_preprocessor_config,
+                faster_first_response=agent_settings.get("basic_agent", {}).get("faster_first_response", True),
+                segment_method=agent_settings.get("basic_agent", {}).get("segment_method", "pysbd"),
+                interrupt_method=agent_settings.get("basic_agent", {}).get("interrupt_method", "user"),
             )
 
         else:

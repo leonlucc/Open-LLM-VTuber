@@ -41,6 +41,11 @@ character_config:
     conversation_agent_choice: 'basic_memory_agent' # 对话代理选择
 
     agent_settings:
+      basic_agent:
+        # 可选参数，根据需要填写
+        faster_first_response: true
+        segment_method: 'pysbd'
+        
       basic_memory_agent:
         # 基础 AI 代理，没什么特别的。
         # 从 llm_config 中选择一个 llm 提供商

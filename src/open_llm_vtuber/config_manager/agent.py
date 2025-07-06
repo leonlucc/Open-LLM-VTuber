@@ -156,7 +156,7 @@ class AgentConfig(I18nMixin, BaseModel):
     """This class contains all of the configurations related to agent."""
 
     conversation_agent_choice: Literal[
-        "basic_memory_agent", "mem0_agent", "hume_ai_agent"
+        "basic_memory_agent", "mem0_agent", "hume_ai_agent", "basic_agent"
     ] = Field(..., alias="conversation_agent_choice")
     agent_settings: AgentSettings = Field(..., alias="agent_settings")
     llm_configs: StatelessLLMConfigs = Field(..., alias="llm_configs")
