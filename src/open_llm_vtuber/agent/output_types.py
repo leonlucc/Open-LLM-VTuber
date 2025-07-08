@@ -75,3 +75,18 @@ class AudioOutput(BaseOutput):
     async def __aiter__(self):
         """Iterate through audio segments and their actions"""
         yield self.audio_path, self.display_text, self.transcript, self.actions
+
+
+@dataclass
+class VisualizationOutput(BaseOutput):
+    """Output type for visual responses (images, videos, etc.)"""
+
+    display_text: DisplayText  # Changed from str to DisplayText
+    tts_text: str  # Text for TTS
+    display_type: str
+    display_data: object
+    actions: Actions
+
+    async def __aiter__(self):
+        """Yield the sentence pair and actions"""
+        yield self.display_text, self.tts_text, self.actions

@@ -8,7 +8,7 @@ from loguru import logger
 from ..message_handler import message_handler
 from .types import WebSocketSend, BroadcastContext
 from .tts_manager import TTSTaskManager
-from ..agent.output_types import SentenceOutput, AudioOutput
+from ..agent.output_types import SentenceOutput, AudioOutput, VisualizationOutput
 from ..agent.input_types import BatchInput, TextData, ImageData, TextSource, ImageSource
 from ..asr.asr_interface import ASRInterface
 from ..live2d_model import Live2dModel
@@ -41,7 +41,7 @@ def create_batch_input(
 
 
 async def process_agent_output(
-    output: Union[AudioOutput, SentenceOutput],
+    output: Union[AudioOutput, SentenceOutput, VisualizationOutput],
     character_config: Any,
     live2d_model: Live2dModel,
     tts_engine: TTSInterface,
@@ -66,6 +66,20 @@ async def process_agent_output(
             )
         elif isinstance(output, AudioOutput):
             full_response = await handle_audio_output(output, websocket_send)
+        elif isinstance(output, VisualizationOutput):
+            full_response = await handle_sentence_output(
+                output,
+                live2d_model,
+                tts_engine,
+                websocket_send,
+                tts_manager,
+                translate_engine,
+            )
+            visualization_payload = {
+                "display_type": output.display_type,
+                "display_data": output.display_data
+            }
+            await websocket_send(json.dumps(visualization_payload))
         else:
             logger.warning(f"Unknown output type: {type(output)}")
     except Exception as e:

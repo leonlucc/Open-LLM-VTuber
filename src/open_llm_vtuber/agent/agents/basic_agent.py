@@ -3,7 +3,7 @@ from typing import AsyncIterator, List, Dict, Any, Literal
 from loguru import logger
 
 from .agent_interface import AgentInterface
-from ..output_types import SentenceOutput, DisplayText
+from ..output_types import SentenceOutput, Actions, DisplayText,VisualizationOutput
 from ..input_types import BatchInput, TextSource
 
 class BasicAgent(AgentInterface):
@@ -52,30 +52,86 @@ class BasicAgent(AgentInterface):
     async def chat(self, input_data: BatchInput) -> AsyncIterator[SentenceOutput]:
         user_query = self._extract_user_query(input_data)
         self._add_message(user_query, "user")
-
-        api_result = await self._call_api(user_query)
+        """
+        {
+            "success": true,
+            "plan": {{
+                "intent": "查询意图描述",
+                "query_type": "visualization|answer", 
+                "target_table": "主要查询的表名",
+                "sql": "生成的SQL语句",
+                "display_type": "chart|table|answer",
+                "chart_type": "bar|line|pie",
+                "x_field": "如果是图表，X轴字段名",
+                "y_field": "如果是图表，Y轴字段名",
+                "answer_format": "如果是answer类型，如何表述答案",
+                "answer_text": "如果是answer类型，返回的答案文本",
+                "table_data": [],
+                "chart": {}
+            }
+        }
+        """
+        #api_result = await self._call_api(user_query)
+        api_result = {
+            "ai_analysis": "最近的两条销售记录如下",
+            "data_source": "database数据，共2条记录",
+            "display_type": "table",
+            "intent": "查询最近的两条销售记录，用于快速查看最新的销售数据。",
+            "query": "查询最近的两条销售记录",
+            "query_type": "visualization",
+            "sql": "SELECT * FROM sales_data ORDER BY sales_date DESC LIMIT 2;",
+            "success": True,
+            "table_data": [{
+                "category": "食品饮料",
+                "created_at": "2025-06-07T21:15:18",
+                "id": 25,
+                "product_name": "伊利牛奶",
+                "quantity": 3,
+                "region": "华南",
+                "sales_amount": 195.03,
+                "sales_date": "2025-05-15",
+                "salesperson": "周杰"
+            },{
+                "category": "美妆个护   ",
+                "created_at": "2025-06-07T21:15:18",
+                "id": 8,
+                "product_name": "欧莱雅洗发水",
+                "quantity": 3,
+                "region": "华南",
+                "sales_amount": 222.03,
+                "sales_date": "2025-05-14",
+                "salesperson": "周杰"
+            }]
+        }
+        logger.info(f"User query: {user_query}, api_result: {api_result}")
         if not api_result.get("success", False):
             reply = api_result.get("message", "API调用失败")
         elif api_result.get("query_type") == "answer":
             reply = api_result.get("answer_text", "未返回答案")
         elif api_result.get("query_type") == "visualization":
-            display_type = api_result.get("display_type")
+            display_type = api_result.get("display_type", "text")
             if display_type == "chart":
                 chart_type = api_result.get("chart_type", "chart")
                 reply = f"已生成{chart_type}图。"
+                data = api_result.get("chart", {})
             elif display_type == "table":
                 reply = "已生成表格。"
+                data = api_result.get("table_data", [])
             else:
                 reply = "已生成可视化结果。"
+                data = {}
         else:
             reply = api_result.get("message", "未知响应类型")
 
         self._add_message(reply, "assistant")
 
         # 只返回一句话作为演示
-        yield SentenceOutput(
-            text=reply,
-            display=DisplayText(name="Agent", avatar=None)
+        yield VisualizationOutput(
+            display_text=DisplayText(text=reply, name="Agent", avatar=None),
+            tts_text=reply,
+            display_type=display_type,
+            display_data=data,
+            actions=Actions()
         )
 
     
