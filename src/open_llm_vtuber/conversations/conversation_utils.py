@@ -75,9 +75,13 @@ async def process_agent_output(
                 tts_manager,
                 translate_engine,
             )
+            # "name": character_config.character_name,
+            # "avatar": character_config.avatar,
             visualization_payload = {
-                "display_type": output.display_type,
-                "display_data": output.display_data
+                "type": "visualization",
+                "display_text": output.display_text.to_dict(),
+                "visual_type": output.visual_type,
+                "visual_data": output.visual_data
             }
             await websocket_send(json.dumps(visualization_payload))
         else:

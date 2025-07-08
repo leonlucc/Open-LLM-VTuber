@@ -49,7 +49,7 @@ class BasicAgent(AgentInterface):
                 return text_data.content
         return ""
 
-    async def chat(self, input_data: BatchInput) -> AsyncIterator[SentenceOutput]:
+    async def chat(self, input_data: BatchInput) -> AsyncIterator[VisualizationOutput]:
         user_query = self._extract_user_query(input_data)
         self._add_message(user_query, "user")
         """
@@ -72,7 +72,7 @@ class BasicAgent(AgentInterface):
         }
         """
         #api_result = await self._call_api(user_query)
-        api_result = {
+        demo1 = {
             "ai_analysis": "最近的两条销售记录如下",
             "data_source": "database数据，共2条记录",
             "display_type": "table",
@@ -103,6 +103,43 @@ class BasicAgent(AgentInterface):
                 "salesperson": "周杰"
             }]
         }
+        demo2 = {
+            "ai_analysis": "最近的两条销售记录如下",
+            "data_source": "database数据，共2条记录",
+            "display_type": "chart",
+            "intent": "查询最近的两条销售记录，用于快速查看最新的销售数据。",
+            "query": "查询最近的两条销售记录",
+            "query_type": "visualization",
+            "sql": "SELECT * FROM sales_data ORDER BY sales_date DESC LIMIT 2;",
+            "success": True,
+            "chart": {
+                "grid": {
+                    "top": 8,
+                    "right": 8,
+                    "bottom": 24,
+                    "left": 36
+                },
+                "xAxis": {
+                    "type": "category",
+                    "data": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+                },
+                "yAxis": {
+                    "type": "value"
+                },
+                "series": [
+                    {
+                        "data": [820, 932, 901, 934, 1290, 1330, 1320],
+                        "type": "line",
+                        "smooth": True
+                    }
+                ],
+                "tooltip": {
+                    "trigger": "axis"
+                }
+            }
+
+        }
+        api_result = demo2
         logger.info(f"User query: {user_query}, api_result: {api_result}")
         if not api_result.get("success", False):
             reply = api_result.get("message", "API调用失败")
@@ -129,8 +166,8 @@ class BasicAgent(AgentInterface):
         yield VisualizationOutput(
             display_text=DisplayText(text=reply, name="Agent", avatar=None),
             tts_text=reply,
-            display_type=display_type,
-            display_data=data,
+            visual_type=display_type,
+            visual_data=data,
             actions=Actions()
         )
 

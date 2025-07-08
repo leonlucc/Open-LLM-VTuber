@@ -83,8 +83,8 @@ class VisualizationOutput(BaseOutput):
 
     display_text: DisplayText  # Changed from str to DisplayText
     tts_text: str  # Text for TTS
-    display_type: str
-    display_data: object
+    visual_type: str
+    visual_data: object
     actions: Actions
 
     async def __aiter__(self):
